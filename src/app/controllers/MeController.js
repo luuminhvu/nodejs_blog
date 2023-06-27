@@ -2,12 +2,11 @@ const Course = require('../models/Course');
 class MeController{
     //[GET] /me/store/courses
     storeCourses(req,res,next){
-        Course.find({}).lean()
-        .then((courses) => {
-            res.render('me/store-courses', { courses });
+        Promise.all([Course.find({}).lean(),Course.countDocumentsWithDeleted({deleted:true})])
+        .then(([courses,deletedCount]) => {
+            res.render('me/store-courses', { courses,deletedCount });
         })
         .catch(next);
-       
     }
     //[GET] /me/trash/courses
     trashCourses(req,res,next){
