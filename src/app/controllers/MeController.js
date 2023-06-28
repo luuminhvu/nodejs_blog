@@ -1,8 +1,15 @@
+const SortMiddleware = require('../middlewares/SortMiddleware');
 const Course = require('../models/Course');
 class MeController{
     //[GET] /me/store/courses
     storeCourses(req,res,next){
-        Promise.all([Course.find({}).lean(),Course.countDocumentsWithDeleted({deleted:true})])
+        let CourseFind = Course.find({}).lean();
+        if(req.query.hasOwnProperty('_sort')){
+           CourseFind = CourseFind.sort({
+                [req.query.column]: req.query.type
+            })
+        }
+        Promise.all([CourseFind,Course.countDocumentsWithDeleted({deleted:true})])
         .then(([courses,deletedCount]) => {
             res.render('me/store-courses', { courses,deletedCount });
         })
@@ -20,4 +27,5 @@ class MeController{
     }
     
 }
+
 module.exports = new MeController();
